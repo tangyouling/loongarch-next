@@ -55,6 +55,15 @@ SYM_CODE_START(kernel_entry)			# kernel entry point
 	li.w		t0, 0x00		# FPE=0, SXE=0, ASXE=0, BTE=0
 	csrwr		t0, LOONGARCH_CSR_EUEN
 
+#ifdef CONFIG_USE_OF
+
+	li.d		t1, -2
+	or		t2, a1, zero
+	beq		a0, t1, dtb_found
+
+	li.d		t2, 0
+dtb_found:
+#endif
 	la.pcrel	t0, __bss_start		# clear .bss
 	st.d		zero, t0, 0
 	la.pcrel	t1, __bss_stop - LONGSIZE
@@ -67,6 +76,11 @@ SYM_CODE_START(kernel_entry)			# kernel entry point
 	st.d		a0, t0, 0		# firmware arguments
 	la.pcrel	t0, fw_arg1
 	st.d		a1, t0, 0
+
+#ifdef CONFIG_USE_OF
+	la.pcrel	t0, fw_passed_dtb
+	st.d		t2, t0, 0
+#endif
 
 	/* KSave3 used for percpu base, initialized as 0 */
 	csrwr		zero, PERCPU_BASE_KS
