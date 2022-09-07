@@ -48,6 +48,7 @@ config LOONGARCH
 	select ARCH_SUPPORTS_ATOMIC_RMW
 	select ARCH_SUPPORTS_HUGETLBFS
 	select ARCH_SUPPORTS_NUMA_BALANCING
+	select SYS_SUPPORTS_RELOCATABLE
 	select ARCH_USE_BUILTIN_BSWAP
 	select ARCH_USE_CMPXCHG_LOCKREF
 	select ARCH_USE_QUEUED_RWLOCKS
@@ -208,6 +209,11 @@ config SCHED_OMIT_FRAME_POINTER
 
 config AS_HAS_EXPLICIT_RELOCS
 	def_bool $(as-instr,x:pcalau12i \$t0$(comma)%pc_hi20(x))
+
+config SYS_SUPPORTS_RELOCATABLE
+	bool
+	help
+	  Selected if the platform supports relocating the kernel.
 
 menu "Kernel type and options"
 
@@ -421,6 +427,13 @@ config ARCH_IOREMAP
 	  We use generic TLB-based ioremap() by default since it has page
 	  protection support. However, you can enable LoongArch DMW-based
 	  ioremap() for better performance.
+
+config RELOCATABLE
+	bool "Relocatable kernel"
+	depends on SYS_SUPPORTS_RELOCATABLE
+	help
+	  This builds a kernel image that retains relocation information
+	  so it can be loaded someplace besides the default 1MB.
 
 config SECCOMP
 	bool "Enable seccomp to safely compute untrusted bytecode"
